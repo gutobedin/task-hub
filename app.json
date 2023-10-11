@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "tasksHub",
+    "slug": "tasksHub",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/imgs/today.jpg",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/imgs/today.jpg",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/imgs/login.jpg",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "favicon": "./assets/imgs/today.jpg"
+    }
+  }
+}
