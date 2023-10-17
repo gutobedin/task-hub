@@ -1,5 +1,11 @@
 import React from "react";
-import { StyleSheet, Text, View, ImageBackground, Image } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  ImageBackground,
+  FlatList,
+} from "react-native";
 import commonStyles from "../commonStyles";
 
 import moment from "moment";
@@ -8,6 +14,119 @@ import "moment/locale/pt-br";
 import Task from "../components/Task";
 
 export default function App() {
+  state = {
+    tasks: [
+      {
+        id: Math.random(),
+        desc: "Comprar Livro de React Native",
+        estimateAt: new Date(),
+        doneAt: new Date(),
+      },
+      {
+        id: Math.random(),
+        desc: "Ler Livro de React Native",
+        estimateAt: new Date(),
+        doneAt: null,
+      },
+      {
+        id: Math.random(),
+        desc: "Comprar Livro de React Native",
+        estimateAt: new Date(),
+        doneAt: new Date(),
+      },
+      {
+        id: Math.random(),
+        desc: "Ler Livro de React Native",
+        estimateAt: new Date(),
+        doneAt: null,
+      },
+      {
+        id: Math.random(),
+        desc: "Comprar Livro de React Native",
+        estimateAt: new Date(),
+        doneAt: new Date(),
+      },
+      {
+        id: Math.random(),
+        desc: "Ler Livro de React Native",
+        estimateAt: new Date(),
+        doneAt: null,
+      },
+      {
+        id: Math.random(),
+        desc: "Comprar Livro de React Native",
+        estimateAt: new Date(),
+        doneAt: new Date(),
+      },
+      {
+        id: Math.random(),
+        desc: "Ler Livro de React Native",
+        estimateAt: new Date(),
+        doneAt: null,
+      },
+      {
+        id: Math.random(),
+        desc: "Comprar Livro de React Native",
+        estimateAt: new Date(),
+        doneAt: new Date(),
+      },
+      {
+        id: Math.random(),
+        desc: "Ler Livro de React Native",
+        estimateAt: new Date(),
+        doneAt: null,
+      },
+      {
+        id: Math.random(),
+        desc: "Comprar Livro de React Native",
+        estimateAt: new Date(),
+        doneAt: new Date(),
+      },
+      {
+        id: Math.random(),
+        desc: "Ler Livro de React Native",
+        estimateAt: new Date(),
+        doneAt: null,
+      },
+      {
+        id: Math.random(),
+        desc: "Comprar Livro de React Native",
+        estimateAt: new Date(),
+        doneAt: new Date(),
+      },
+      {
+        id: Math.random(),
+        desc: "Ler Livro de React Native",
+        estimateAt: new Date(),
+        doneAt: null,
+      },
+      {
+        id: Math.random(),
+        desc: "Comprar Livro de React Native",
+        estimateAt: new Date(),
+        doneAt: new Date(),
+      },
+      {
+        id: Math.random(),
+        desc: "Ler Livro de React Native",
+        estimateAt: new Date(),
+        doneAt: null,
+      },
+      {
+        id: Math.random(),
+        desc: "Comprar Livro de React Native",
+        estimateAt: new Date(),
+        doneAt: new Date(),
+      },
+      {
+        id: Math.random(),
+        desc: "Ler Livro de React Native",
+        estimateAt: new Date(),
+        doneAt: null,
+      },
+    ],
+  };
+
   const todayImage = require("../../assets/imgs/today.jpg");
   const today = moment()
     .locale("pt-br")
@@ -26,12 +145,11 @@ export default function App() {
         </View>
       </ImageBackground>
       <View style={styles.container}>
-        <Task
-          desc="Comprar Livro"
-          estimateAt={new Date()}
-          doneAt={new Date()}
+        <FlatList
+          data={this.state.tasks}
+          keyExtractor={(item) => `${item.id}`}
+          renderItem={({ item }) => <Task {...item} />}
         />
-        <Task desc="Ler livro" estimateAt={new Date()} doneAt={null} />
       </View>
     </View>
   );
@@ -59,5 +177,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginLeft: 20,
     marginBottom: 30,
+  },
+  container: {
+    height: 520,
   },
 });
