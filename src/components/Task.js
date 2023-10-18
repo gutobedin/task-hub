@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableWithoutFeedback } from "react-native";
 import commonStyles from "../commonStyles";
 import { FontAwesome } from "@expo/vector-icons";
 
@@ -16,7 +16,9 @@ export default (props) => {
     .format("ddd, D [de] MMMM");
   return (
     <View style={styles.container}>
-      <View style={styles.checkConntainer}>{getCheckView(props.doneAt)}</View>
+      <TouchableWithoutFeedback onPress={() => props.toggleTask(props.id)}>
+        <View style={styles.checkConntainer}>{getCheckView(props.doneAt)}</View>
+      </TouchableWithoutFeedback>
       <View>
         <Text style={[styles.desc, doneOrNotStyle]}>{props.desc}</Text>
         <Text style={styles.date}>{formattedDate}</Text>
