@@ -5,19 +5,24 @@ import {
   View,
   ImageBackground,
   FlatList,
+  TouchableOpacity,
 } from "react-native";
 import commonStyles from "../commonStyles";
+import { FontAwesome } from "@expo/vector-icons";
 
 import moment from "moment";
 import "moment/locale/pt-br";
 
 import Task from "../components/Task";
+import AddTask from "./addTask";
 
 class App extends Component {
   constructor(props) {
     super(props);
-
     this.state = {
+      showDoneTasks: true,
+      showAddTask: true,
+      visibleTasks: [],
       tasks: [
         {
           id: Math.random(),
@@ -35,6 +40,28 @@ class App extends Component {
     };
   }
 
+  componentDidMount = () => {
+    this.filterTasks();
+  };
+
+  toggleFilter = () => {
+    this.setState({ showDoneTasks: !this.state.showDoneTasks }, () => {
+      this.filterTasks();
+    });
+  };
+
+  filterTasks = () => {
+    let visibleTasks = null;
+    if (this.state.showDoneTasks) {
+      visibleTasks = [...this.state.tasks];
+    } else {
+      const pending = (task) => task.doneAt === null;
+      visibleTasks = this.state.tasks.filter(pending);
+    }
+
+    this.setState({ visibleTasks });
+  };
+
   toggleTask = (taskId) => {
     const tasks = [...this.state.tasks];
     tasks.forEach((task) => {
@@ -43,7 +70,7 @@ class App extends Component {
       }
     });
 
-    this.setState({ tasks });
+    this.setState({ tasks }, this.filterTasks);
   };
 
   render() {
@@ -54,11 +81,24 @@ class App extends Component {
 
     return (
       <View>
+        <AddTask
+          isVisible={this.state.showAddTask}
+          onCancel={() => this.setState({ showAddTask: false })}
+        />
         <ImageBackground
           resizeMode="cover"
           source={todayImage}
           style={styles.Image}
         >
+          <View style={styles.iconBar}>
+            <TouchableOpacity onPress={this.toggleFilter}>
+              <FontAwesome
+                name={this.state.showDoneTasks ? "eye" : "eye-slash"}
+                size={25}
+                color={commonStyles.colors.seconday}
+              />
+            </TouchableOpacity>
+          </View>
           <View style={styles.titleBar}>
             <Text style={styles.title}>Hoje</Text>
             <Text style={styles.subTitle}>{today}</Text>
@@ -66,7 +106,7 @@ class App extends Component {
         </ImageBackground>
         <View style={styles.container}>
           <FlatList
-            data={this.state.tasks}
+            data={this.state.visibleTasks}
             keyExtractor={(item) => `${item.id}`}
             renderItem={({ item }) => (
               <Task {...item} toggleTask={this.toggleTask} />
@@ -103,6 +143,12 @@ const styles = StyleSheet.create({
   },
   container: {
     height: 520,
+  },
+  iconBar: {
+    flexDirection: "row",
+    marginHorizontal: 20,
+    justifyContent: "flex-end",
+    marginTop: 40,
   },
 });
 
