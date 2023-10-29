@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -6,6 +6,7 @@ import {
   ImageBackground,
   FlatList,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import commonStyles from "../commonStyles";
 import { FontAwesome } from "@expo/vector-icons";
@@ -16,106 +17,127 @@ import "moment/locale/pt-br";
 import Task from "../components/Task";
 import AddTask from "./addTask";
 
-class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      showDoneTasks: true,
-      showAddTask: true,
-      visibleTasks: [],
-      tasks: [
-        {
-          id: Math.random(),
-          desc: "Comprar Livro de React Native",
-          estimateAt: new Date(),
-          doneAt: new Date(),
-        },
-        {
-          id: Math.random(),
-          desc: "Ler Livro de React Native",
-          estimateAt: new Date(),
-          doneAt: null,
-        },
-      ],
-    };
-  }
+export default function App() {
+  const [showDoneTasks, setShowDoneTasks] = useState(true);
+  const [showAddTask, setShowAddTask] = useState(false);
+  const [visibleTasks, setVisibleTasks] = useState([]);
+  const [tasks, setTasks] = useState([
+    {
+      id: Math.random(),
+      desc: "Comprar Livro de React Native",
+      estimateAt: new Date(),
+      doneAt: new Date(),
+    },
+    {
+      id: Math.random(),
+      desc: "Ler Livro de React Native",
+      estimateAt: new Date(),
+      doneAt: null,
+    },
+  ]);
+  const [updateCounter, setUpdateCounter] = useState(0); // Contador para forçar a atualização
 
-  componentDidMount = () => {
-    this.filterTasks();
+  const todayImage = require("../../assets/imgs/today.jpg");
+  const today = moment()
+    .locale("pt-br")
+    .format("ddd, D [de] MMMM");
+
+  useEffect(() => {
+    filterTasks();
+  }, [showDoneTasks, updateCounter]); // Inclua updateCounter como dependência
+
+  const toggleFilter = () => {
+    setShowDoneTasks(!showDoneTasks);
   };
 
-  toggleFilter = () => {
-    this.setState({ showDoneTasks: !this.state.showDoneTasks }, () => {
-      this.filterTasks();
-    });
-  };
-
-  filterTasks = () => {
+  const filterTasks = () => {
     let visibleTasks = null;
-    if (this.state.showDoneTasks) {
-      visibleTasks = [...this.state.tasks];
+    if (showDoneTasks) {
+      visibleTasks = [...tasks];
     } else {
       const pending = (task) => task.doneAt === null;
-      visibleTasks = this.state.tasks.filter(pending);
+      visibleTasks = tasks.filter(pending);
     }
 
-    this.setState({ visibleTasks });
+    setVisibleTasks(visibleTasks);
   };
 
-  toggleTask = (taskId) => {
-    const tasks = [...this.state.tasks];
-    tasks.forEach((task) => {
+  const toggleTask = (taskId) => {
+    const updatedTasks = [...tasks];
+    updatedTasks.forEach((task) => {
       if (task.id === taskId) {
         task.doneAt = task.doneAt ? null : new Date();
       }
     });
 
-    this.setState({ tasks }, this.filterTasks);
+    setTasks(updatedTasks);
+    setUpdateCounter(updateCounter + 1); // Atualize o contador
   };
 
-  render() {
-    const todayImage = require("../../assets/imgs/today.jpg");
-    const today = moment()
-      .locale("pt-br")
-      .format("ddd, D [de] MMMM");
+  const addTask = (newTask) => {
+    if (!newTask.desc) {
+      Alert.alert("Dados inválidos", "Descrição não informada");
+      return;
+    }
+    const updatedTasks = [...tasks];
+    updatedTasks.push({
+      id: Math.random(),
+      desc: newTask.desc,
+      estimateAt: newTask.date,
+      doneAt: null,
+    });
 
-    return (
-      <View>
-        <AddTask
-          isVisible={this.state.showAddTask}
-          onCancel={() => this.setState({ showAddTask: false })}
-        />
-        <ImageBackground
-          resizeMode="cover"
-          source={todayImage}
-          style={styles.Image}
-        >
-          <View style={styles.iconBar}>
-            <TouchableOpacity onPress={this.toggleFilter}>
-              <FontAwesome
-                name={this.state.showDoneTasks ? "eye" : "eye-slash"}
-                size={25}
-                color={commonStyles.colors.seconday}
-              />
-            </TouchableOpacity>
-          </View>
-          <View style={styles.titleBar}>
-            <Text style={styles.title}>Hoje</Text>
-            <Text style={styles.subTitle}>{today}</Text>
-          </View>
-        </ImageBackground>
-        <View style={styles.container}>
-          <FlatList
-            data={this.state.visibleTasks}
-            keyExtractor={(item) => `${item.id}`}
-            renderItem={({ item }) => (
-              <Task {...item} toggleTask={this.toggleTask} />
-            )}
-          />
+    setTasks(updatedTasks);
+    setShowAddTask(false);
+    setUpdateCounter(updateCounter + 1); // Atualize o contador
+  };
+
+  return (
+    <View>
+      <AddTask
+        isVisible={showAddTask}
+        onSave={addTask}
+        onCancel={() => setShowAddTask(false)}
+      />
+      <ImageBackground
+        resizeMode="cover"
+        source={todayImage}
+        style={styles.Image}
+      >
+        <View style={styles.iconBar}>
+          <TouchableOpacity onPress={toggleFilter}>
+            <FontAwesome
+              name={showDoneTasks ? "eye" : "eye-slash"}
+              size={25}
+              color={commonStyles.colors.seconday}
+            />
+          </TouchableOpacity>
         </View>
+        <View style={styles.titleBar}>
+          <Text style={styles.title}>Hoje</Text>
+          <Text style={styles.subTitle}>{today}</Text>
+        </View>
+      </ImageBackground>
+      <View style={styles.container}>
+        <FlatList
+          data={visibleTasks}
+          keyExtractor={(item) => `${item.id}${updateCounter}`} // Inclua updateCounter na chave
+          renderItem={({ item }) => <Task {...item} toggleTask={toggleTask} />}
+        />
       </View>
-    );
-  }
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => setShowAddTask(true)}
+        activeOpacity={0.7}
+      >
+        <FontAwesome
+          name="plus"
+          size={25}
+          color={commonStyles.colors.seconday}
+        />
+      </TouchableOpacity>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -150,6 +172,15 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     marginTop: 40,
   },
+  addButton: {
+    position: "absolute",
+    right: 30,
+    bottom: 30,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: commonStyles.colors.today,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 });
-
-export default App;

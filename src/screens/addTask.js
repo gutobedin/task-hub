@@ -1,34 +1,76 @@
-import React, { Component } from "react";
+import React, { useState } from "react";
 import {
   Modal,
   View,
   StyleSheet,
   TouchableWithoutFeedback,
   Text,
+  TextInput,
+  TouchableOpacity,
 } from "react-native";
 import commonStyles from "../commonStyles";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
-export default class addTask extends Component {
-  render() {
+const initialState = { desc: "", date: new Date(), showDatePicker: false };
+
+export default function AddTask(props) {
+  const [taskState, setTaskState] = useState({ ...initialState });
+  console.log("taskState", taskState);
+
+  const save = () => {
+    const newTask = {
+      desc: taskState.desc,
+      date: taskState.date,
+    };
+    console.log("newTask", newTask);
+    props.onSave && props.onSave(newTask);
+    setTaskState({ ...initialState });
+  };
+
+  const getDatePicker = () => {
     return (
-      <Modal
-        transparent={true}
-        visible={this.props.isVisible}
-        onRequestClose={this.props.onCancel}
-        animationType="slide"
-      >
-        <TouchableWithoutFeedback onPress={this.props.onCancel}>
-          <View style={styles.background} />
-        </TouchableWithoutFeedback>
-        <View style={styles.container}>
-          <Text style={styles.header}>Nova Tarefa</Text>
-        </View>
-        <TouchableWithoutFeedback onPress={this.props.onCancel}>
-          <View style={styles.background} />
-        </TouchableWithoutFeedback>
-      </Modal>
+      <DateTimePicker
+        value={taskState.date}
+        onChange={(_, date) => setTaskState({ ...taskState, date })}
+        mode="date"
+        display="spinner"
+      />
     );
-  }
+  };
+
+  return (
+    <Modal
+      transparent={true}
+      visible={props.isVisible}
+      onRequestClose={props.onCancel}
+      animationType="slide"
+    >
+      <TouchableWithoutFeedback onPress={props.onCancel}>
+        <View style={styles.background} />
+      </TouchableWithoutFeedback>
+      <View style={styles.container}>
+        <Text style={styles.header}>Nova Tarefa</Text>
+        <TextInput
+          placeholder="Informe a descrição..."
+          style={styles.input}
+          value={taskState.desc}
+          onChangeText={(desc) => setTaskState({ ...taskState, desc })}
+        />
+        {getDatePicker()}
+        <View style={styles.botoes}>
+          <TouchableOpacity onPress={props.onCancel} style={styles.button}>
+            <Text style={styles.textButton}>Cancelar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={save}>
+            <Text style={styles.textButton}>Salvar</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+      <TouchableWithoutFeedback onPress={props.onCancel}>
+        <View style={styles.background} />
+      </TouchableWithoutFeedback>
+    </Modal>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -37,7 +79,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.7)",
   },
   container: {
-    flex: 2,
     backgroundColor: "#FFF",
   },
   header: {
@@ -47,5 +88,32 @@ const styles = StyleSheet.create({
     textAlign: "center",
     padding: 15,
     fontSize: 18,
+  },
+  botoes: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+  },
+  button: {
+    margin: 20,
+    marginRight: 30,
+    marginLeft: -10,
+    padding: 12,
+    width: 90,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: commonStyles.colors.today,
+    borderRadius: 20,
+  },
+  textButton: {
+    color: commonStyles.colors.seconday,
+  },
+  input: {
+    height: 40,
+    margin: 10,
+    paddingLeft: 10,
+    backgroundColor: "#FFF",
+    borderWidth: 1,
+    borderColor: "#e3e3e3",
+    borderRadius: 6,
   },
 });
