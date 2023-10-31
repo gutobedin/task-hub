@@ -1,10 +1,16 @@
-import React, { useEffect } from "react";
-import { View, Text, StyleSheet, TouchableWithoutFeedback } from "react-native";
+import React from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableWithoutFeedback,
+  TouchableOpacity,
+} from "react-native";
 import commonStyles from "../commonStyles";
 import { FontAwesome } from "@expo/vector-icons";
-
 import moment from "moment";
 import "moment/locale/pt-br";
+import Swipeout from "react-native-swipeout";
 
 export default (props) => {
   const doneOrNotStyle =
@@ -14,16 +20,37 @@ export default (props) => {
   const formattedDate = moment(date)
     .locale("pt-br")
     .format("ddd, D [de] MMMM");
+
+  const swipeoutBtns = [
+    {
+      text: null,
+      component: (
+        <View style={styles.deleteButton}>
+          <FontAwesome name="trash" size={25} color="#fff" />
+        </View>
+      ),
+      backgroundColor: "red",
+      onPress: () => {
+        props.onDelete && props.onDelete(props.id);
+        console.log("Item excluído");
+      },
+    },
+  ];
+
   return (
-    <View style={styles.container}>
-      <TouchableWithoutFeedback onPress={() => props.toggleTask(props.id)}>
-        <View style={styles.checkConntainer}>{getCheckView(props.doneAt)}</View>
-      </TouchableWithoutFeedback>
-      <View>
-        <Text style={[styles.desc, doneOrNotStyle]}>{props.desc}</Text>
-        <Text style={styles.date}>{formattedDate}</Text>
+    <Swipeout right={swipeoutBtns}>
+      <View style={styles.container}>
+        <TouchableWithoutFeedback onPress={() => props.toggleTask(props.id)}>
+          <View style={styles.checkConntainer}>
+            {getCheckView(props.doneAt)}
+          </View>
+        </TouchableWithoutFeedback>
+        <View>
+          <Text style={[styles.desc, doneOrNotStyle]}>{props.desc}</Text>
+          <Text style={styles.date}>{formattedDate}</Text>
+        </View>
       </View>
-    </View>
+    </Swipeout>
   );
 
   function getCheckView(doneAt) {
@@ -46,6 +73,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     alignItems: "center",
     paddingVertical: 10,
+    backgroundColor: "#FFF",
   },
   checkConntainer: {
     width: "20%",
@@ -77,5 +105,10 @@ const styles = StyleSheet.create({
     fontFamily: "Times New Roman",
     color: commonStyles.colors.subText,
     fontSize: 13,
+  },
+  deleteButton: {
+    alignItems: "center",
+    justifyContent: "center",
+    height: 50,
   },
 });

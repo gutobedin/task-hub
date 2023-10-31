@@ -35,7 +35,7 @@ export default function App() {
       doneAt: null,
     },
   ]);
-  const [updateCounter, setUpdateCounter] = useState(0); // Contador para forçar a atualização
+  const [updateCounter, setUpdateCounter] = useState(0);
 
   const todayImage = require("../../assets/imgs/today.jpg");
   const today = moment()
@@ -44,7 +44,7 @@ export default function App() {
 
   useEffect(() => {
     filterTasks();
-  }, [showDoneTasks, updateCounter]); // Inclua updateCounter como dependência
+  }, [showDoneTasks, updateCounter]);
 
   const toggleFilter = () => {
     setShowDoneTasks(!showDoneTasks);
@@ -71,7 +71,7 @@ export default function App() {
     });
 
     setTasks(updatedTasks);
-    setUpdateCounter(updateCounter + 1); // Atualize o contador
+    setUpdateCounter(updateCounter + 1);
   };
 
   const addTask = (newTask) => {
@@ -89,7 +89,14 @@ export default function App() {
 
     setTasks(updatedTasks);
     setShowAddTask(false);
-    setUpdateCounter(updateCounter + 1); // Atualize o contador
+    setUpdateCounter(updateCounter + 1);
+  };
+
+  const deleteTask = (id) => {
+    console.log("tasks", tasks);
+    const filterTask = tasks.filter((task) => task.id !== id);
+    setTasks(filterTask);
+    setUpdateCounter(updateCounter + 1);
   };
 
   return (
@@ -121,8 +128,10 @@ export default function App() {
       <View style={styles.container}>
         <FlatList
           data={visibleTasks}
-          keyExtractor={(item) => `${item.id}${updateCounter}`} // Inclua updateCounter na chave
-          renderItem={({ item }) => <Task {...item} toggleTask={toggleTask} />}
+          keyExtractor={(item) => `${item.id}${updateCounter}`}
+          renderItem={({ item }) => (
+            <Task {...item} toggleTask={toggleTask} onDelete={deleteTask} />
+          )}
         />
       </View>
       <TouchableOpacity
