@@ -10,12 +10,12 @@ import {
 } from "react-native";
 import commonStyles from "../commonStyles";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import RNDateTimePicker from "@react-native-community/datetimepicker";
 
 const initialState = { desc: "", date: new Date(), showDatePicker: false };
 
 export default function AddTask(props) {
   const [taskState, setTaskState] = useState({ ...initialState });
-  console.log("taskState", taskState);
 
   const save = () => {
     const newTask = {
@@ -34,6 +34,7 @@ export default function AddTask(props) {
         onChange={(_, date) => setTaskState({ ...taskState, date })}
         mode="date"
         display="spinner"
+        themeVariant="light"
       />
     );
   };
@@ -51,6 +52,7 @@ export default function AddTask(props) {
       <View style={styles.container}>
         <Text style={styles.header}>Nova Tarefa</Text>
         <TextInput
+          placeholderTextColor="rgba(0, 0, 0, 0.5)"
           placeholder="Informe a descrição..."
           style={styles.input}
           value={taskState.desc}

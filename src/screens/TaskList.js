@@ -10,41 +10,61 @@ import {
 } from "react-native";
 import commonStyles from "../commonStyles";
 import { FontAwesome } from "@expo/vector-icons";
+import axios from "axios";
+import { server, showError } from "../common";
 
 import moment from "moment";
 import "moment/locale/pt-br";
 
 import Task from "../components/Task";
 import AddTask from "./addTask";
+import { useFocusEffect } from "@react-navigation/native";
 
-export default function App() {
+export default function TaskList(props) {
   const [showDoneTasks, setShowDoneTasks] = useState(true);
   const [showAddTask, setShowAddTask] = useState(false);
   const [visibleTasks, setVisibleTasks] = useState([]);
-  const [tasks, setTasks] = useState([
-    {
-      id: Math.random(),
-      desc: "Comprar Livro de React Native",
-      estimateAt: new Date(),
-      doneAt: new Date(),
-    },
-    {
-      id: Math.random(),
-      desc: "Ler Livro de React Native",
-      estimateAt: new Date(),
-      doneAt: null,
-    },
-  ]);
-  const [updateCounter, setUpdateCounter] = useState(0);
+  const [tasks, setTasks] = useState([]);
+  const token = props.token.params.token;
 
   const todayImage = require("../../assets/imgs/today.jpg");
+  const tomorrowImage = require("../../assets/imgs/tomorrow.jpg");
+  const weekImage = require("../../assets/imgs/week.jpg");
+  const monthImage = require("../../assets/imgs/month.jpg");
   const today = moment()
     .locale("pt-br")
     .format("ddd, D [de] MMMM");
 
-  useEffect(() => {
-    filterTasks();
-  }, [showDoneTasks, updateCounter]);
+  const loadTasks = async () => {
+    try {
+      const maxDate = moment()
+        .add({ days: props.daysAhead })
+        .format("YYYY-MM-DD 23:59:59");
+
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+
+      const response = await axios.get(`${server}/tasks?date=${maxDate}`, {
+        headers,
+      });
+
+      setTasks(response.data);
+    } catch (e) {
+      showError(e);
+    }
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      loadTasks();
+
+      // Cleanup function (será chamada quando o componente for desfocado)
+      return () => {
+        // Coloque aqui qualquer lógica de limpeza, se necessário
+      };
+    }, [showDoneTasks])
+  );
 
   const toggleFilter = () => {
     setShowDoneTasks(!showDoneTasks);
@@ -62,42 +82,94 @@ export default function App() {
     setVisibleTasks(visibleTasks);
   };
 
-  const toggleTask = (taskId) => {
-    const updatedTasks = [...tasks];
-    updatedTasks.forEach((task) => {
-      if (task.id === taskId) {
-        task.doneAt = task.doneAt ? null : new Date();
-      }
-    });
+  const toggleTask = async (taskId) => {
+    const headers = {
+      Authorization: `Bearer ${token}`,
+    };
 
-    setTasks(updatedTasks);
-    setUpdateCounter(updateCounter + 1);
+    try {
+      await axios.put(`${server}/tasks/${taskId}/toggle`, {}, { headers });
+
+      // Atualiza o estado das tarefas
+      setTasks((prevTasks) =>
+        prevTasks.map((task) => {
+          if (task.id === taskId) {
+            return { ...task, doneAt: task.doneAt ? null : new Date() };
+          }
+          return task;
+        })
+      );
+    } catch (err) {
+      showError(err);
+    }
   };
 
-  const addTask = (newTask) => {
+  const addTask = async (newTask) => {
     if (!newTask.desc) {
       Alert.alert("Dados inválidos", "Descrição não informada");
       return;
     }
-    const updatedTasks = [...tasks];
-    updatedTasks.push({
-      id: Math.random(),
-      desc: newTask.desc,
-      estimateAt: newTask.date,
-      doneAt: null,
-    });
-
-    setTasks(updatedTasks);
-    setShowAddTask(false);
-    setUpdateCounter(updateCounter + 1);
+    const headers = {
+      Authorization: `Bearer ${token}`,
+    };
+    try {
+      await axios.post(
+        `${server}/tasks`,
+        {
+          desc: newTask.desc,
+          estimateAt: newTask.date,
+        },
+        { headers }
+      );
+      setShowAddTask(false);
+      loadTasks();
+    } catch (err) {
+      showError(err);
+    }
   };
 
-  const deleteTask = (id) => {
-    console.log("tasks", tasks);
-    const filterTask = tasks.filter((task) => task.id !== id);
-    setTasks(filterTask);
-    setUpdateCounter(updateCounter + 1);
+  const deleteTask = async (id) => {
+    const headers = {
+      Authorization: `Bearer ${token}`,
+    };
+    try {
+      await axios.delete(`${server}/tasks/${id}`, { headers });
+
+      // Atualiza o estado de tasks removendo a tarefa com o ID correspondente
+      setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
+    } catch (err) {
+      showError(err);
+    }
   };
+
+  getImage = () => {
+    switch (props.daysAhead) {
+      case 0:
+        return todayImage;
+      case 1:
+        return tomorrowImage;
+      case 7:
+        return weekImage;
+      default:
+        return monthImage;
+    }
+  };
+  getColor = () => {
+    switch (props.daysAhead) {
+      case 0:
+        return commonStyles.colors.today;
+      case 1:
+        return commonStyles.colors.tomorrow;
+      case 7:
+        return commonStyles.colors.week;
+      default:
+        return commonStyles.colors.month;
+    }
+  };
+
+  useEffect(() => {
+    filterTasks();
+  }, [showDoneTasks, tasks]);
 
   return (
     <View>
@@ -108,10 +180,17 @@ export default function App() {
       />
       <ImageBackground
         resizeMode="cover"
-        source={todayImage}
+        source={getImage()}
         style={styles.Image}
       >
         <View style={styles.iconBar}>
+          <TouchableOpacity onPress={() => props.navigation.openDrawer()}>
+            <FontAwesome
+              name={"bars"}
+              size={25}
+              color={commonStyles.colors.seconday}
+            />
+          </TouchableOpacity>
           <TouchableOpacity onPress={toggleFilter}>
             <FontAwesome
               name={showDoneTasks ? "eye" : "eye-slash"}
@@ -121,21 +200,21 @@ export default function App() {
           </TouchableOpacity>
         </View>
         <View style={styles.titleBar}>
-          <Text style={styles.title}>Hoje</Text>
+          <Text style={styles.title}>{props.title}</Text>
           <Text style={styles.subTitle}>{today}</Text>
         </View>
       </ImageBackground>
       <View style={styles.container}>
         <FlatList
           data={visibleTasks}
-          keyExtractor={(item) => `${item.id}${updateCounter}`}
+          keyExtractor={(item) => `${item.id}`}
           renderItem={({ item }) => (
             <Task {...item} toggleTask={toggleTask} onDelete={deleteTask} />
           )}
         />
       </View>
       <TouchableOpacity
-        style={styles.addButton}
+        style={[styles.addButton, { backgroundColor: getColor() }]}
         onPress={() => setShowAddTask(true)}
         activeOpacity={0.7}
       >
@@ -178,7 +257,7 @@ const styles = StyleSheet.create({
   iconBar: {
     flexDirection: "row",
     marginHorizontal: 20,
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
     marginTop: 40,
   },
   addButton: {
