@@ -18,8 +18,8 @@ import { server, showError, showSuccess } from "../common";
 import axios from "axios";
 
 export default function Auth() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("gutoobedin@gmail.com");
+  const [password, setPassword] = useState("123321");
   const [name, setName] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [stageNew, setStageNew] = useState(false);

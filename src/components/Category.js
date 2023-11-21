@@ -1,5 +1,4 @@
-import React from "react";
-import axios from "axios";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -12,13 +11,16 @@ import { FontAwesome } from "@expo/vector-icons";
 import moment from "moment";
 import "moment/locale/pt-br";
 import Swipeout from "react-native-swipeout";
-import { server, showError } from "../common";
+import TaskList from "../screens/TaskList";
+import { showError } from "../common";
+import axios from "axios";
 
 export default (props) => {
   const doneOrNotStyle =
     props.doneAt != null ? { textDecorationLine: "line-through" } : {};
 
   const date = props.doneAt ? props.doneAt.date : props.estimateAt;
+  const [showTasks, setShowtasks] = useState(false);
   const formattedDate = moment(date)
     .locale("pt-br")
     .format("ddd, D [de] MMMM");
@@ -33,61 +35,37 @@ export default (props) => {
       ),
       backgroundColor: "red",
       onPress: () => {
-        deleteTask(props.id);
+        props.deleteCategory(props.id);
         console.log("Item excluído");
       },
     },
   ];
 
-  const toggleTask = async (taskId) => {
-    const headers = {
-      Authorization: `Bearer ${props.token}`,
-    };
-
-    try {
-      await axios.put(`${server}/tasks/${taskId}/toggle`, {}, { headers });
-
-      // Atualiza o estado das tarefas
-      props.setTasks((prevTasks) =>
-        prevTasks.map((task) => {
-          if (task.id === taskId) {
-            return { ...task, doneAt: task.doneAt ? null : new Date() };
-          }
-          return task;
-        })
-      );
-    } catch (err) {
-      showError(err);
-    }
-  };
-
-  const deleteTask = async (id) => {
-    const headers = {
-      Authorization: `Bearer ${props.token}`,
-    };
-    try {
-      await axios.delete(`${server}/tasks/${id}`, { headers });
-
-      // Atualiza o estado de tasks removendo a tarefa com o ID correspondente
-      props.setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
-    } catch (err) {
-      showError(err);
-    }
+  const toggleTasks = () => {
+    setShowtasks(!showTasks);
   };
 
   return (
     <Swipeout right={swipeoutBtns}>
-      <View style={styles.container}>
-        <TouchableWithoutFeedback onPress={() => toggleTask(props.id)}>
+      <TouchableWithoutFeedback onPress={() => toggleTasks()}>
+        <View style={styles.container}>
           <View style={styles.checkConntainer}>
-            {getCheckView(props.doneAt)}
+            <FontAwesome name="folder" size={23} />
           </View>
-        </TouchableWithoutFeedback>
-        <View>
-          <Text style={[styles.desc, doneOrNotStyle]}>{props.desc}</Text>
-          <Text style={styles.date}>{formattedDate}</Text>
+          <View>
+            <Text style={[styles.desc, doneOrNotStyle]}>{props.desc}</Text>
+          </View>
         </View>
-      </View>
+      </TouchableWithoutFeedback>
+      {showTasks && (
+        <TaskList
+          showDoneTasks={props.showDoneTasks}
+          token={props.token}
+          categoryId={props.id}
+          daysAhead={props.daysAhead}
+          reloadTasks={props.reloadTasks}
+        />
+      )}
     </Swipeout>
   );
 
@@ -106,6 +84,7 @@ export default (props) => {
 
 const styles = StyleSheet.create({
   container: {
+    width: "100%",
     flexDirection: "row",
     borderColor: "#AAA",
     borderBottomWidth: 1,

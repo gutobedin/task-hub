@@ -9,6 +9,7 @@ import Auth from "./src/screens/Auth";
 import TaskList from "./src/screens/TaskList";
 import { Text, TouchableOpacity, View } from "react-native";
 import { Gravatar } from "react-native-gravatar";
+import CategoryList from "./src/screens/CategoryList";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -104,7 +105,7 @@ const DrawerNavigator = ({ route }) => {
   const [token, setToken] = useState(initialToken);
 
   const createTaskListScreen = (title, daysAhead) => (props) => (
-    <TaskList title={title} daysAhead={daysAhead} token={token} {...props} />
+    <CategoryList title={title} daysAhead={daysAhead} token={token} {...props} />
   );
 
   return (

@@ -17,57 +17,17 @@ import Axios from "axios";
 
 const initialState = {
   desc: "",
-  categoryId: "",
-  date: new Date(),
-  showDatePicker: false,
 };
 
-export default function AddTask(props) {
-  const [taskState, setTaskState] = useState({ ...initialState });
-  const [categories, setCategories] = useState([]);
-
-  const loadCategories = async () => {
-    try {
-      const headers = {
-        Authorization: `Bearer ${props.token}`,
-      };
-
-      const response = await Axios.get(`${server}/categories`, {
-        headers,
-      });
-      setCategories(response?.data);
-    } catch (e) {
-      showError(e);
-    }
-  };
-
-  useEffect(() => {
-    loadCategories();
-  }, []);
-  useEffect(() => {
-    loadCategories();
-  }, [props.categories]);
+export default function AddCategory(props) {
+  const [categoryState, setCategoryState] = useState({ ...initialState });
 
   const save = () => {
     const newTask = {
-      desc: taskState.desc,
-      date: taskState.date,
-      categoryId: taskState.categoryId,
+      desc: categoryState.desc,
     };
     props.onSave && props.onSave(newTask);
-    setTaskState({ ...initialState });
-  };
-
-  const getDatePicker = () => {
-    return (
-      <DateTimePicker
-        value={taskState.date}
-        onChange={(_, date) => setTaskState({ ...taskState, date })}
-        mode="date"
-        display="spinner"
-        themeVariant="light"
-      />
-    );
+    setCategoryState({ ...initialState });
   };
 
   return (
@@ -81,52 +41,14 @@ export default function AddTask(props) {
         <View style={styles.background} />
       </TouchableWithoutFeedback>
       <View style={styles.container}>
-        <Text style={styles.header}>Nova Tarefa</Text>
+        <Text style={styles.header}>Nova Categoria</Text>
         <TextInput
           placeholderTextColor="rgba(0, 0, 0, 0.5)"
-          placeholder="Informe a descrição..."
+          placeholder="Informe a categoria..."
           style={styles.input}
-          value={taskState.desc}
-          onChangeText={(desc) => setTaskState({ ...taskState, desc })}
+          value={categoryState.desc}
+          onChangeText={(desc) => setCategoryState({ ...categoryState, desc })}
         />
-        <View style={styles.selectDropDown}>
-          <SelectDropdown
-            data={categories?.map((e) => e.desc)}
-            onSelect={(selectedItem, index) => {
-              setTaskState({ ...taskState, categoryId: categories[index].id });
-            }}
-            buttonTextAfterSelection={(selectedItem, index) => {
-              return selectedItem;
-            }}
-            rowTextForSelection={(item, index) => {
-              return item;
-            }}
-            defaultButtonText="Selecione uma categoria"
-            buttonTextStyle={{
-              color: "black", // Cor do texto do botão
-              fontSize: 15,
-            }}
-            buttonStyle={{
-              borderRadius: 8,
-              width: "90%",
-              height: 40,
-            }}
-            dropdownStyle={{
-              backgroundColor: "white", // Cor de fundo do dropdown
-              borderWidth: 1,
-              borderColor: "gray",
-              borderRadius: 8,
-            }}
-            rowStyle={{
-              padding: 10,
-              backgroundColor: "white", // Cor de fundo das opções
-              borderBottomWidth: 1,
-              borderBottomColor: "gray",
-              borderRadius: 8,
-            }}
-          />
-        </View>
-        {getDatePicker()}
         <View style={styles.botoes}>
           <TouchableOpacity onPress={props.onCancel} style={styles.button}>
             <Text style={styles.textButton}>Cancelar</Text>
