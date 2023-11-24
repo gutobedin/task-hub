@@ -9,11 +9,6 @@ import {
   TouchableOpacity,
 } from "react-native";
 import commonStyles from "../commonStyles";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import SelectDropdown from "react-native-select-dropdown";
-import { useFocusEffect } from "@react-navigation/native";
-import { server, showError } from "../common";
-import Axios from "axios";
 
 const initialState = {
   desc: "",

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   ImageBackground,
   Text,
@@ -18,8 +18,8 @@ import { server, showError, showSuccess } from "../common";
 import axios from "axios";
 
 export default function Auth() {
-  const [email, setEmail] = useState("gutoobedin@gmail.com");
-  const [password, setPassword] = useState("123321");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [stageNew, setStageNew] = useState(false);
@@ -93,7 +93,7 @@ export default function Auth() {
   return (
     <KeyboardAvoidingView behavior="padding" enabled>
       <ImageBackground source={backgroundImage} style={styles.background}>
-        <Text style={styles.title}>Tasks</Text>
+        <Text style={styles.title}>TaskHub</Text>
         <View style={styles.formContainer}>
           <Text style={styles.subTitle}>
             {stageNew ? "Crie a sua conta" : "Informe seus dados"}

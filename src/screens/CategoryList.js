@@ -16,7 +16,6 @@ import { server, showError } from "../common";
 import moment from "moment";
 import "moment/locale/pt-br";
 
-import Task from "../components/Task";
 import AddTask from "./addTask";
 import { useFocusEffect } from "@react-navigation/native";
 import Category from "../components/Category";
@@ -53,8 +52,6 @@ export default function CategoryList(props) {
       showError(e);
     }
   };
-
-  console.log("categorias", categories);
 
   const deleteCategory = async (id) => {
     const headers = {
@@ -235,7 +232,11 @@ export default function CategoryList(props) {
         onPress={() => setShowAddCategory(true)}
         activeOpacity={0.7}
       >
-        <Text style={styles.textCategory}>Nova categoria</Text>
+        <FontAwesome
+          name="folder"
+          size={25}
+          color={commonStyles.colors.seconday}
+        />
       </TouchableOpacity>
     </View>
   );
@@ -286,9 +287,9 @@ const styles = StyleSheet.create({
   },
   addCategory: {
     position: "absolute",
-    left: 30,
+    right: 30,
     padding: 14,
-    bottom: 30,
+    bottom: 100,
     borderRadius: 25,
     backgroundColor: commonStyles.colors.today,
     alignItems: "center",

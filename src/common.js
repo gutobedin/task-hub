@@ -1,6 +1,6 @@
 import { Alert } from "react-native";
 
-const server = "http://192.168.0.227:3000";
+const server = "http://172.30.17.214:3000";
 
 function showError(err) {
   Alert.alert("Ops! Ocorreu um Problema!", `Mensagem: ${err}`);
